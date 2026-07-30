@@ -22,7 +22,7 @@
         <p><strong>Мой продакшен-стек:</strong> Python (FastAPI), PostgreSQL, Docker Compose, Nginx, Linux.</p>
         <p>Сайт-портфолио сейчас находится в процессе деплоя<span class="cursor"></span></p>
         <p>Если вам нужен надежный бэкенд, интеграция с Telegram или автоматизация вашего проекта — пишите:</p>
-        <a href="https://t.me" class="btn" target="_blank">Связаться в Telegram</a>
+        <a href="https://t.me/vkarymov" class="btn" target="_blank">Связаться в Telegram</a>
     </div>
 </body>
 </html>
