@@ -1,0 +1,18 @@
+services:
+  vktech_frontend:
+    build: ./frontend
+    container_name: vktech_frontend
+    restart: unless-stopped
+    expose:
+      - "80"
+
+  vktech_nginx:
+    image: nginx:alpine
+    container_name: vktech_nginx
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - vktech_frontend
