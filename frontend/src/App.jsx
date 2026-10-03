@@ -36,6 +36,58 @@ function App() {
   
   const [isMatrixActive, setIsMatrixActive] = useState(false)
   const logoClicksRef = useRef(0)
+  const [secrets, setSecrets] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('vktech-secrets') || '[]') } catch { return [] }
+  })
+  const [matrixMessages, setMatrixMessages] = useState([])
+  const [isRebootOpen, setIsRebootOpen] = useState(false)
+  const [chatState, setChatState] = useState(() => {
+    try { return JSON.parse(sessionStorage.getItem('vktech-chat') || '{"open":false,"messages":[],"draft":"","source":""}') } catch { return { open: false, messages: [], draft: '', source: '' } }
+  })
+  const statusClicksRef = useRef(0)
+  const touchSecretTimerRef = useRef(null)
+  const caseSwipeStartRef = useRef(null)
+  const railFrameRef = useRef(null)
+  const [isRailDragging, setIsRailDragging] = useState(false)
+  const [isRewardOpen, setIsRewardOpen] = useState(false)
+  const [rewardShown, setRewardShown] = useState(() => localStorage.getItem('vktech-reward-shown') === 'true')
+
+  const unlockSecret = (id, message) => {
+    setSecrets((previous) => {
+      if (previous.includes(id)) return previous
+      const next = [...previous, id]
+      localStorage.setItem('vktech-secrets', JSON.stringify(next))
+      if (message) setMatrixMessages((items) => [...items, message])
+      return next
+    })
+  }
+
+  const openChat = (source) => {
+    setChatState((previous) => ({ ...previous, open: true, source: previous.source || source || `/#section-${currentSection}` }))
+  }
+
+  useEffect(() => {
+    sessionStorage.setItem('vktech-chat', JSON.stringify(chatState))
+  }, [chatState])
+
+  useEffect(() => {
+    if (secrets.length === 5 && !rewardShown) {
+      setIsRewardOpen(true)
+      setRewardShown(true)
+      localStorage.setItem('vktech-reward-shown', 'true')
+    }
+  }, [secrets, rewardShown])
+
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      const tag = event.target.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || event.target.isContentEditable) return
+      if (event.key === 'ArrowLeft') { setActiveProjectIdx((index) => Math.max(0, index - 1)); return }
+      if (event.key === 'ArrowRight') { setActiveProjectIdx((index) => Math.min(PROJECTS.length - 1, index + 1)); return }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
 
   // Пасхалка: клик по логотипу 3 раза запускает матрицу
   const handleLogoClick = (e) => {
@@ -44,9 +96,11 @@ function App() {
     if (logoClicksRef.current >= 3) {
       logoClicksRef.current = 0
       setIsMatrixActive(true)
-      setTimeout(() => {
-        setIsMatrixActive(false)
-      }, 6000)
+      unlockSecret('01')
+      setMatrixMessages([])
+      const messages = ['DEBUG LAYER // UNLOCKED', 'SECRET_01 FOUND', 'WAIT...', "THAT WASN'T THE ONLY ONE.", 'FIND ALL FIVE. THERE MAY BE A REWARD.']
+      messages.forEach((message, index) => setTimeout(() => setMatrixMessages((items) => [...items, message]), 700 + index * 850))
+      setTimeout(() => setIsMatrixActive(false), 6200)
     }
   }
 
@@ -104,6 +158,35 @@ function App() {
     })
   }
 
+  const setScrollFromRailPointer = (clientY) => {
+    if (!railRef.current) return
+    const rect = railRef.current.getBoundingClientRect()
+    const progress = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height))
+    const total = document.documentElement.scrollHeight - window.innerHeight
+    window.scrollTo({ top: total * progress, behavior: 'auto' })
+  }
+
+  const handleRailPointerDown = (event) => {
+    if (event.pointerType === 'touch') return
+    event.preventDefault()
+    railRef.current?.setPointerCapture(event.pointerId)
+    setIsRailDragging(true)
+    setScrollFromRailPointer(event.clientY)
+  }
+
+  const handleRailPointerMove = (event) => {
+    if (!isRailDragging) return
+    event.preventDefault()
+    if (railFrameRef.current) cancelAnimationFrame(railFrameRef.current)
+    railFrameRef.current = requestAnimationFrame(() => setScrollFromRailPointer(event.clientY))
+  }
+
+  const handleRailPointerUp = (event) => {
+    if (!isRailDragging) return
+    railRef.current?.releasePointerCapture?.(event.pointerId)
+    setIsRailDragging(false)
+  }
+
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
   const scrollToBottom = () =>
     window.scrollTo({
@@ -111,8 +194,27 @@ function App() {
       behavior: 'smooth',
     })
 
+  const handleReboot = () => {
+    if (chatState.draft) {
+      setIsRebootOpen(true)
+      return
+    }
+    unlockSecret('02')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const confirmReboot = () => {
+    setChatState((previous) => ({ ...previous, draft: '' }))
+    setIsRebootOpen(false)
+    unlockSecret('02')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   // Отслеживание скролла для рельсы HUD
   useEffect(() => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const isDesktop = window.matchMedia('(min-width: 901px)').matches
+
     const handleScroll = () => {
       const totalScroll = document.documentElement.scrollHeight - window.innerHeight
       if (totalScroll <= 0) return
@@ -132,6 +234,10 @@ function App() {
 
     window.addEventListener('scroll', handleScroll, { passive: true })
     handleScroll()
+
+    if (prefersReducedMotion || !isDesktop) {
+      return () => window.removeEventListener('scroll', handleScroll)
+    }
 
     const ctx = gsap.context(() => {
       const heroLines = heroTitleRef.current?.querySelectorAll('.hero__title-line')
@@ -240,18 +346,6 @@ function App() {
         )
       }
 
-      ScrollTrigger.create({
-        trigger: casesRef.current,
-        start: 'top top',
-        end: '+=350%',
-        pin: true,
-        scrub: 1,
-        onUpdate: (self) => {
-          const p = self.progress
-          const idx = Math.min(Math.floor(p * PROJECTS.length), PROJECTS.length - 1)
-          setActiveProjectIdx(idx)
-        },
-      })
     }, document)
 
     return () => {
@@ -282,15 +376,25 @@ function App() {
   return (
     <>
       {/* МАТРИЦА ПАСХАЛКА */}
-      {isMatrixActive && <canvas ref={matrixCanvasRef} className="matrix-canvas" />}
+      {isMatrixActive && <><canvas ref={matrixCanvasRef} className="matrix-canvas" /><div className="matrix-debug" role="status">{matrixMessages.map((message) => <span key={message}>{message}</span>)}</div></>}
+
+      {secrets.length > 0 && <button type="button" className={`secret-progress ${secrets.length === 5 ? 'is-complete' : ''}`} onClick={() => secrets.length === 5 && setIsRewardOpen(true)} aria-live="polite">SECRETS // {String(secrets.length).padStart(2, '0')}:05{secrets.length === 5 && <strong> · REWARD UNLOCKED</strong>}</button>}
+
+      {isRewardOpen && <aside className="reward-window" role="dialog" aria-modal="false" aria-labelledby="reward-title"><header><span>CHALLENGE COMPLETE</span><button type="button" aria-label="Закрыть награду" onClick={() => setIsRewardOpen(false)}>×</button></header><div className="reward-window__body"><h2 id="reward-title">5 / 5 ПАСХАЛОК НАЙДЕНО</h2><p>Поздравляю.<br />Вы нашли все мои пасхалки.</p><p>При обновлении сайта они появятся снова, а пока держите право на скидку 10% на первый заказ.</p><div className="reward-window__status">REWARD: 10% DISCOUNT<br />REWARD STATUS: UNLOCKED</div><div className="reward-window__actions"><button type="button" onClick={() => setIsRewardOpen(false)}>[ ОСТАТЬСЯ НА САЙТЕ ]</button><button type="button" disabled title="Ожидает интеграции Telegram Bot">[ ПЕРЕЙТИ В TELEGRAM → ]</button></div><small>VERIFICATION: PENDING // backend integration required</small></div></aside>}
+
+      {isRebootOpen && <div className="modal-overlay" onClick={() => setIsRebootOpen(false)}><div className="modal-container reboot-dialog" role="dialog" aria-modal="true" aria-labelledby="reboot-title" onClick={(event) => event.stopPropagation()}><div className="modal-header"><span>// SYSTEM REBOOT</span><button type="button" className="modal-close" onClick={() => setIsRebootOpen(false)}>[X]</button></div><div className="modal-body"><h3 id="reboot-title" className="modal-title">Сбросить черновик?</h3><p className="modal-note">Несохранённый текст чата будет очищен. Переписка и найденные секреты останутся.</p><div className="dialog-actions"><button type="button" className="modal-close dialog-button" onClick={() => setIsRebootOpen(false)}>ОТМЕНА</button><button type="button" className="modal-submit" onClick={confirmReboot}>ПОДТВЕРДИТЬ REBOOT</button></div></div></div></div>}
+
+      <aside className={`vk-chat ${chatState.open ? 'is-open' : 'is-minimized'}`} aria-label="VKTech связь">
+        {!chatState.open ? <button type="button" className="vk-chat__launcher" onClick={() => openChat()}><span>●</span> VKTECH // СВЯЗЬ</button> : <div className="vk-chat__window"><div className="vk-chat__header"><span>VKTECH // СВЯЗЬ</span><div><button type="button" onClick={() => setChatState((previous) => ({ ...previous, open: false }))}>_</button><button type="button" onClick={() => setChatState((previous) => ({ ...previous, open: false }))}>×</button></div></div><div className="vk-chat__body"><p>Канал подготовлен. Доставка сообщений пока не подключена.</p>{secrets.length === 5 && <small>REWARD ELIGIBILITY: UNLOCKED<br />VERIFICATION: PENDING</small>}{chatState.messages.map((message, index) => <p key={`${message}-${index}`} className="vk-chat__message">&gt; {message}</p>)}<small>SOURCE: {chatState.source || `/#section-${currentSection}`}</small></div><form onSubmit={(event) => { event.preventDefault(); if (!chatState.draft.trim()) return; setChatState((previous) => ({ ...previous, messages: [...previous.messages, previous.draft.trim()], draft: '' })) }}><label className="sr-only" htmlFor="vk-chat-draft">Сообщение</label><textarea id="vk-chat-draft" value={chatState.draft} onChange={(event) => setChatState((previous) => ({ ...previous, draft: event.target.value }))} placeholder="Опишите задачу — черновик сохранится в этой сессии." /><button type="submit">СОХРАНИТЬ В ЧАТЕ</button></form></div>}
+      </aside>
 
       {/* МОДАЛКА ЗАЯВОК */}
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
-          <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-container" role="dialog" aria-modal="true" aria-labelledby="contact-dialog-title" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <span>// ИНИЦИАЛИЗАЦИЯ ЗАЯВКИ</span>
-              <button className="modal-close" onClick={() => setIsModalOpen(false)}>[X]</button>
+              <button type="button" className="modal-close" aria-label="Закрыть форму" onClick={() => setIsModalOpen(false)}>[X]</button>
             </div>
             <div className="modal-body">
               {formStatus === 'SUCCESS' ? (
@@ -301,13 +405,14 @@ function App() {
               ) : (
                 <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   <div>
-                    <h3 className="modal-title">Оставить задачу</h3>
-                    <p style={{ color: '#888', fontSize: '11px', margin: 0 }}>Заполните поля, и пакет данных уйдет в разработку.</p>
+                    <h3 id="contact-dialog-title" className="modal-title">Оставить задачу</h3>
+                    <p style={{ color: '#888', fontSize: '11px', margin: 0 }}>Канал доставки ещё не подключён. Откройте VKTECH // СВЯЗЬ: черновик сохранится в текущей сессии.</p>
                   </div>
 
                   <div className="modal-field">
-                    <label className="modal-label">ВАШЕ ИМЯ</label>
+                    <label className="modal-label" htmlFor="contact-name">ВАШЕ ИМЯ</label>
                     <input
+                      id="contact-name"
                       type="text"
                       required
                       className="modal-input"
@@ -318,8 +423,9 @@ function App() {
                   </div>
 
                   <div className="modal-field">
-                    <label className="modal-label">ТЕЛЕГРАМ / ТЕЛЕФОН</label>
+                    <label className="modal-label" htmlFor="contact-details">ТЕЛЕГРАМ / ТЕЛЕФОН</label>
                     <input
+                      id="contact-details"
                       type="text"
                       required
                       className="modal-input"
@@ -330,8 +436,9 @@ function App() {
                   </div>
 
                   <div className="modal-field">
-                    <label className="modal-label">ОПИСАНИЕ ЗАДАЧИ</label>
+                    <label className="modal-label" htmlFor="contact-message">ОПИСАНИЕ ЗАДАЧИ</label>
                     <textarea
+                      id="contact-message"
                       required
                       className="modal-textarea"
                       placeholder="Нужна система автоматизации или сайт..."
@@ -340,8 +447,8 @@ function App() {
                     />
                   </div>
 
-                  <button type="submit" className="modal-submit" disabled={formStatus === 'SENDING'}>
-                    {formStatus === 'SENDING' ? 'ПЕРЕДАЧА ПАКЕТА...' : '[ ОТПРАВИТЬ ЗАЯВКУ → ]'}
+                  <button type="button" className="modal-submit" onClick={() => { setIsModalOpen(false); openChat('/#contact') }}>
+                    [ ОТКРЫТЬ КАНАЛ СВЯЗИ → ]
                   </button>
                 </form>
               )}
@@ -362,7 +469,7 @@ function App() {
         </div>
 
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => openChat(`/#section-${currentSection}`)}
           style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: 0 }}
           className="navigation__contact"
         >
@@ -371,26 +478,32 @@ function App() {
       </header>
 
       <div className="scroll-interface">
-        <div className="scroll-interface__top" onClick={scrollToTop}>
+        <button type="button" className="scroll-interface__top" onClick={scrollToTop} aria-label="Прокрутить в начало страницы">
           <span>ПРОКРУТКА</span>
           <span className="scroll-interface__num">{currentSection}</span>
-        </div>
+        </button>
 
-        <div
+        <button
+          type="button"
           ref={railRef}
-          className="scroll-interface__rail"
+          className={`scroll-interface__rail ${isRailDragging ? 'is-dragging' : ''}`}
           onClick={handleRailClick}
+          onPointerDown={handleRailPointerDown}
+          onPointerMove={handleRailPointerMove}
+          onPointerUp={handleRailPointerUp}
+          onPointerCancel={handleRailPointerUp}
+          aria-label="Перейти к выбранной позиции на странице"
         >
           <div ref={scrollFillRef} className="scroll-interface__fill" />
           <div ref={scrollCursorRef} className="scroll-interface__cursor">
             <span />
           </div>
-        </div>
+        </button>
 
-        <div className="scroll-interface__bottom" onClick={scrollToBottom}>
+        <button type="button" className="scroll-interface__bottom" onClick={scrollToBottom} aria-label="Прокрутить в конец страницы">
           <span>↓</span>
           <span>07</span>
-        </div>
+        </button>
       </div>
 
       <main>
@@ -439,7 +552,7 @@ function App() {
           <div ref={manifestoContentRef} style={{ width: '100%', height: '100%', transformStyle: 'preserve-3d', willChange: 'transform, opacity, filter' }}>
             <div className="manifesto__laser-line">
               <div className="laser__hud">
-                <span>[ СБРОС СИСТЕМЫ ]</span>
+                <button type="button" className="reboot-trigger" onClick={handleReboot}>[ СБРОС СИСТЕМЫ ]</button>
                 <span>РАЗДЕЛ_02 :: АКТИВИРОВАН</span>
               </div>
             </div>
@@ -562,9 +675,9 @@ function App() {
                 </div>
               )}
 
-              <div className="cases__progress-bar">
+              <div className="cases__bus-label">SYSTEMS // 03</div><div className="cases__progress-bar" onPointerDown={(event) => { if (event.pointerType !== 'mouse') caseSwipeStartRef.current = { x: event.clientX, y: event.clientY } }} onPointerUp={(event) => { const start = caseSwipeStartRef.current; caseSwipeStartRef.current = null; if (!start) return; const dx = event.clientX - start.x; const dy = event.clientY - start.y; if (Math.abs(dx) < 42 || Math.abs(dx) < Math.abs(dy)) return; setActiveProjectIdx((index) => Math.max(0, Math.min(PROJECTS.length - 1, index + (dx < 0 ? 1 : -1)))) }}>
                 {PROJECTS.map((proj, idx) => (
-                  <div key={proj.id} className={`cases__progress-seg ${idx === activeProjectIdx ? 'is-active' : ''}`} />
+                  <button type="button" key={proj.id} className={`cases__progress-seg ${idx === activeProjectIdx ? 'is-active' : ''}`} onClick={() => setActiveProjectIdx(idx)} aria-label={`Открыть кейс ${proj.title}`} aria-pressed={idx === activeProjectIdx}><strong>{proj.id}</strong><span className="cases__mobile-case">{proj.id} // {proj.title.split(' // ')[0]}</span></button>
                 ))}
               </div>
             </div>
@@ -638,14 +751,16 @@ function App() {
 
               <div className="cases__steps-grid">
                 {currentProject.schema.map((node, idx) => (
-                  <div
+                  <button
+                    type="button"
                     key={idx}
                     className={`cases__step-btn ${activeNodeIdx === idx ? 'is-active' : ''}`}
                     onClick={() => setActiveNodeIdx(idx)}
+                    aria-pressed={activeNodeIdx === idx}
                   >
                     <span className="cases__step-num">{node.step}</span>
                     <span className="cases__step-name">{node.label.split(' ')[0]}</span>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -672,7 +787,7 @@ function App() {
               </div>
               <h2 className="capabilities__title">ЧТО<br />МЫ<br />СОЗДАЁМ</h2>
               <p className="cases__description">
-                Проектируем и разворачиваем цифровые решения под ключ. Никаких шаблонных сайтов — только кастомная архитектура, интеграции и стабильная инфраструктура.
+                Разбираем задачу и собираем систему вокруг реального рабочего процесса.
               </p>
             </div>
 
@@ -680,33 +795,33 @@ function App() {
               <div className="capabilities__item">
                 <div className="capabilities__item-header">
                   <span className="capabilities__item-num">01</span>
-                  <span className="capabilities__item-name">ЦИФРОВЫЕ ПРОДУКТЫ</span>
+                  <span className="capabilities__item-name">АВТОМАТИЗАЦИЯ</span>
                 </div>
-                <div className="capabilities__item-details">// Сайты / Интернет-магазины / Высоконагруженные платформы</div>
+                <div className="capabilities__item-details">// Убираем ручные действия и соединяем рабочие этапы</div>
               </div>
 
               <div className="capabilities__item">
                 <div className="capabilities__item-header">
                   <span className="capabilities__item-num">02</span>
-                  <span className="capabilities__item-name">АВТОМАТИЗАЦИЯ</span>
+                  <span className="capabilities__item-name">ИНТЕГРАЦИИ</span>
                 </div>
-                <div className="capabilities__item-details">// API / Вебхуки / Кастомные Telegram-боты / Синхронизация iiko</div>
+                <div className="capabilities__item-details">// API, вебхуки и передача контекста между сервисами</div>
               </div>
 
               <div className="capabilities__item">
                 <div className="capabilities__item-header">
                   <span className="capabilities__item-num">03</span>
-                  <span className="capabilities__item-name">ВНУТРЕННИЕ СИСТЕМЫ</span>
+                  <span className="capabilities__item-name">TELEGRAM-СИСТЕМЫ</span>
                 </div>
-                <div className="capabilities__item-details">// CRM-панели / Дашборды / Бизнес-инструменты управления</div>
+                <div className="capabilities__item-details">// Рабочие каналы, уведомления и понятные действия для команды</div>
               </div>
 
               <div className="capabilities__item">
                 <div className="capabilities__item-header">
                   <span className="capabilities__item-num">04</span>
-                  <span className="capabilities__item-name">ИНФРАСТРУКТУРА</span>
+                  <span className="capabilities__item-name">BACKEND & DATA</span>
                 </div>
-                <div className="capabilities__item-details">// VPS / Docker-контейнеры / Мониторинг / Автоматические бэкапы</div>
+                <div className="capabilities__item-details">// Логика, данные и контуры, на которых держится продукт</div>
               </div>
             </div>
           </div>
@@ -730,35 +845,17 @@ function App() {
                 <span className="cases__index">РАЗДЕЛ_05</span>
                 <span className="cases__badge">ПРОЦЕСС</span>
               </div>
-              <h2 className="capabilities__title">КОНВЕЙЕР<br />РАЗРАБОТКИ</h2>
+              <h2 className="capabilities__title">КАК РУЧНОЕ<br />СТАНОВИТСЯ<br />СИСТЕМОЙ</h2>
               <p className="cases__description">
-                Каждый проект проходит строгие инженерные фазы. Никакой хаотичной разработки — только последовательный конвейер от логики до стабильного продакшна.
+                Показываем путь без инженерного жаргона: данные не теряются между человеком, сервисами и командой.
               </p>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '4vw', alignItems: 'center' }}>
-              <div className="pipeline__steps">
-                <span>ВХОДНЫЕ ДАННЫЕ</span><span className="pipeline__arrow">↓</span>
-                <span>АНАЛИЗ</span><span className="pipeline__arrow">↓</span>
-                <span>АРХИТЕКТУРА</span><span className="pipeline__arrow">↓</span>
-                <span>СБОРКА</span><span className="pipeline__arrow">↓</span>
-                <span>ИНТЕГРАЦИЯ</span><span className="pipeline__arrow">↓</span>
-                <span>ЗАПУСК</span><span className="pipeline__arrow">↓</span>
-                <span>МОНИТОРИНГ</span>
-              </div>
-
-              <div className="pipeline__status-box">
-                <div className="pipeline__status-header">
-                  <span>REALTIME_PIPELINE_STATUS.log</span>
-                </div>
-                <div className="pipeline__status-list">
-                  <div className="pipeline__status-row"><span>АРХИТЕКТУРА</span><span className="pipeline__status-check">✓</span></div>
-                  <div className="pipeline__status-row"><span>РАЗРАБОТКА</span><span className="pipeline__status-check">✓</span></div>
-                  <div className="pipeline__status-row"><span>ИНТЕГРАЦИЯ</span><span className="pipeline__status-check">✓</span></div>
-                  <div className="pipeline__status-row"><span>РАЗВЕРТЫВАНИЕ</span><span className="pipeline__status-check">✓</span></div>
-                  <div className="pipeline__status-row pipeline__status-row--active"><span>МОНИТОРИНГ</span><span className="pipeline__status-dot" /></div>
-                </div>
-              </div>
+            <div className="pipeline-story" aria-label="Наглядное сравнение ручного и автоматического потока данных">
+              <div className="pipeline-story__chapter pipeline-story__chapter--before"><div className="pipeline-story__label">01 // БЫЛО</div><svg viewBox="0 0 620 170" className="pipeline-story__svg" role="img" aria-label="Человек вручную переносит заявку из Telegram в CRM"><g className="story-node"><rect x="18" y="35" width="112" height="90" rx="4"/><path d="M34 52h80M34 65h52M34 84h64M34 97h42"/><text x="38" y="148">TELEGRAM</text></g><g className="story-person"><circle cx="258" cy="48" r="16"/><path d="M258 64v38m-28-15 28-23 28 23m-28 15-19 32m19-32 19 32M210 136h98"/><rect x="216" y="108" width="84" height="42" rx="3"/></g><path className="story-manual-line" d="M132 82 C175 82 180 82 220 82M300 82 C350 82 360 82 402 82"/><g className="story-node"><rect x="410" y="35" width="112" height="90" rx="4"/><path d="M426 54h80M426 70h36M426 88h60M426 104h48"/><text x="452" y="148">CRM</text></g><text className="story-manual-copy" x="220" y="164">РУЧНОЙ ПЕРЕНОС</text></svg><p>Заявка уже есть в Telegram, но человек переписывает её в CRM.</p></div>
+              <div className="pipeline-story__chapter pipeline-story__chapter--break"><div className="pipeline-story__label">02 // РАЗБОР</div><div className="pipeline-story__break-line"><span>TELEGRAM</span><i>?</i><span>CRM</span></div><p>Данные существуют в обеих системах. Между ними — ручная работа и риск потерять контекст.</p></div>
+              <div className="pipeline-story__chapter pipeline-story__chapter--after"><div className="pipeline-story__label">03 // СТАЛО</div><svg viewBox="0 0 620 150" className="pipeline-story__svg" role="img" aria-label="Автоматический поток Telegram через API в CRM"><g className="story-node"><rect x="18" y="26" width="120" height="84" rx="4"/><path d="M36 46h84M36 61h50M36 78h67"/><text x="42" y="136">TELEGRAM</text></g><path className="story-auto-line" d="M140 68H242M378 68H482"/><g className="story-api"><rect x="245" y="30" width="130" height="76" rx="4"/><path d="M270 55l15 13-15 13m78-26-15 13 15 13"/><text x="284" y="136">BOT / API</text></g><g className="story-node"><rect x="485" y="26" width="120" height="84" rx="4"/><path d="M503 46h84M503 62h43M503 78h65"/><text x="526" y="136">CRM</text></g><g className="story-packets"><rect x="165" y="61" width="12" height="12" rx="1"/><rect x="408" y="61" width="12" height="12" rx="1"/></g></svg><button type="button" className="story-secret-packet" aria-label="Системный пакет" onClick={() => unlockSecret('04', 'PACKET INTERCEPTED // payload: { type: "easter_egg", id: "04" }')}></button><p>Пакеты сами передают данные. Человек остаётся в работе с заявкой, а не между системами.</p></div>
+              {secrets.includes('04') && <div className="pipeline-story__payload" role="status">PACKET INTERCEPTED<br />payload: &#123; type: "easter_egg", id: "04" &#125;</div>}
             </div>
           </div>
 
@@ -781,38 +878,17 @@ function App() {
                 <span className="cases__index">РАЗДЕЛ_06</span>
                 <span className="cases__badge">VKTECH</span>
               </div>
-              <h2 className="stack__tagline">МАЛАЯ КОМАНДА.<br />СЕРЬЕЗНЫЕ СИСТЕМЫ.</h2>
+              <h2 className="stack__tagline">ТЗ НЕ ОБЯЗАТЕЛЬНО.<br />ЗАДАЧА — ОБЯЗАТЕЛЬНА.</h2>
               <p className="cases__description">
-                Без раздутых штатов, маркетологов и бюрократии. Прямая разработка архитектуры, кода и инфраструктуры с упором на стабильность и производительность.
+                РАССКАЗЫВАЕТЕ → РАЗБИРАЕМ → ПРЕДЛАГАЕМ → РЕШАЕМ.
               </p>
               <div className="stack__location">
-                <span>БАЗИРУЕМСЯ В УЗБЕКИСТАНЕ</span>
-                <span>СОЗДАЕМ ЦИФРОВЫЕ СИСТЕМЫ</span>
+                <span>[×] ГОТОВОЕ ТЗ</span>
+                <span>[✓] ПОНИМАНИЕ ЗАДАЧИ</span>
               </div>
             </div>
 
-            <div className="stack__grid">
-              <div className="stack__category">
-                <span className="stack__cat-title">// ФРОНТЕНД</span>
-                <span className="stack__cat-items">REACT / VITE / GSAP</span>
-              </div>
-              <div className="stack__category">
-                <span className="stack__cat-title">// БЭКЕНД</span>
-                <span className="stack__cat-items">NODE / API / WEBHOOKS</span>
-              </div>
-              <div className="stack__category">
-                <span className="stack__cat-title">// БАЗЫ ДАННЫХ</span>
-                <span className="stack__cat-items">SQLITE / POSTGRESQL</span>
-              </div>
-              <div className="stack__category">
-                <span className="stack__cat-title">// ИНФРАСТРУКТУРА</span>
-                <span className="stack__cat-items">LINUX / DOCKER / NGINX</span>
-              </div>
-              <div className="stack__category" style={{ gridColumn: 'span 2' }}>
-                <span className="stack__cat-title">// АВТОМАТИЗАЦИЯ</span>
-                <span className="stack__cat-items">TELEGRAM / iiko / CUSTOM APIs</span>
-              </div>
-            </div>
+            <div className="stack__checklist"><span className="stack__cat-title">ДЛЯ СТАРТА НЕ НУЖНЫ:</span><p>[×] ГОТОВОЕ ТЗ</p><p>[×] ВЫБРАННЫЙ СТЕК</p><p>[×] ПРОДУМАННАЯ АРХИТЕКТУРА</p><span className="stack__cat-title">ДОСТАТОЧНО:</span><button type="button" className={`stack__checklist-ok ${secrets.includes('03') ? 'is-confirmed' : ''}`} onClick={() => unlockSecret('03')}>[✓] ПОНИМАНИЯ ЗАДАЧИ</button>{secrets.includes('03') && <div className="stack__secret-response" role="status">TASK UNDERSTOOD<br />TECHNICAL SPECIFICATION: NOT REQUIRED<br />HUMAN EXPLANATION: ACCEPTED<br />STATUS: READY<br /><strong>SECRET_03 FOUND</strong></div>}<small>ВАМ НЕ НУЖНО ПРИХОДИТЬ С ГОТОВЫМ РЕШЕНИЕМ.<br />ДОСТАТОЧНО ПРИЙТИ С ЗАДАЧЕЙ.</small></div>
           </div>
 
           <div className="cases__top" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '16px' }}>
@@ -844,7 +920,7 @@ function App() {
             </div>
 
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => openChat('/#contact')}
               className="contact__cta-btn"
               style={{ cursor: 'pointer' }}
             >
@@ -854,17 +930,17 @@ function App() {
 
           <div className="contact__footer-info">
             <span>VKTECH / ЦИФРОВЫЕ СИСТЕМЫ</span>
-            <div className="contact__online-status">
+            <button type="button" className="contact__online-status status-secret" onClick={() => { statusClicksRef.current += 1; if (statusClicksRef.current >= 3) { statusClicksRef.current = 0; unlockSecret('05', "YOU'RE LOOKING IN THE RIGHT PLACES. EASTER_EGG_05 FOUND.") } }}>
               <span className="navigation__dot" />
-              <span>В СЕТИ</span>
-            </div>
+              <span>STATUS: WAITING_FOR_INPUT</span>
+            </button>
             <span>2026</span>
           </div>
         </section>
       </main>
 
       <footer className="site-end">
-        <div>© 2026 Алёна Дэрр. Все права защищены.</div>
+        <div>© 2026 VKTECH. Все права защищены.</div>
         <div>VKTECH · Разработка и инфраструктура: <a href="https://t.me/karimov_vadim" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--gold)' }}>vktech.uz</a></div>
       </footer>
     </>

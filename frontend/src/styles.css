@@ -51,6 +51,14 @@ textarea {
   font: inherit;
 }
 
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
 main {
   position: relative;
   z-index: 1;
@@ -191,6 +199,10 @@ main {
 .scroll-interface__top,
 .scroll-interface__bottom {
   width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
   display: flex;
   justify-content: space-between;
   line-height: 1;
@@ -213,6 +225,9 @@ main {
   position: relative;
   width: 12px;
   flex: 1;
+  padding: 0;
+  border: 0;
+  background: transparent;
   margin: 12px 0;
   cursor: pointer;
   display: flex;
@@ -988,6 +1003,10 @@ main {
   background: var(--gold);
   box-shadow: 0 0 8px var(--gold);
 }
+.cases__progress-seg { border: 0; padding: 0; cursor: pointer; }
+.cases__mobile-case { display: none; }
+.cases__bus-label { margin-top:18px; color:#666; font:700 9px var(--font-mono); letter-spacing:.12em; }.cases__progress-seg strong { position:absolute; top:-42px; left:0; color:#777; font:700 25px var(--font-sans); opacity:0; transform:translateY(5px); transition:opacity .2s ease,transform .2s ease,color .2s ease; }.cases__progress-bar:hover .cases__progress-seg strong,.cases__progress-bar:focus-within .cases__progress-seg strong { opacity:.55; transform:translateY(0); }.cases__progress-seg:hover strong,.cases__progress-seg:focus-visible strong,.cases__progress-seg.is-active strong { color:var(--gold); opacity:1; }.cases__progress-seg:hover .cases__mobile-case,.cases__progress-seg:focus-visible .cases__mobile-case { color:#ddd; }.cases__progress-seg:focus-visible { outline:0; }
+.cases__progress-bar { gap:0; align-items:center; }.cases__progress-seg { position:relative; height:30px; background:transparent; border-top:1px solid rgba(255,255,255,.18); flex:1; }.cases__progress-seg.is-active { background:transparent; border-top-color:var(--gold); box-shadow:none; }.cases__mobile-case { display:block; position:absolute; top:-18px; left:0; color:#666; font:700 8px var(--font-mono); letter-spacing:.06em; white-space:nowrap; }.cases__progress-seg.is-active .cases__mobile-case { color:var(--gold); }.cases__progress-seg:after { content:''; position:absolute; top:-3px; left:0; width:5px; height:5px; border-radius:50%; background:#555; }.cases__progress-seg.is-active:after { background:var(--gold); box-shadow:0 0 10px var(--gold); }
 
 /* ========================================
    VECTOR ILLUSTRATION ARTWORK & ANIMATIONS
@@ -1055,6 +1074,7 @@ main {
   text-align: center;
   font-family: var(--font-mono);
   cursor: pointer;
+  color: inherit;
   transition: all 0.25s ease;
 }
 
@@ -1299,6 +1319,17 @@ main {
   box-shadow: 0 0 8px var(--online);
   animation: onlinePulse 2s ease-in-out infinite;
 }
+
+.pipeline-story { width:100%; display:grid; gap:18px; font-family:var(--font-mono); }
+.pipeline-story__chapter { position:relative; padding:16px; border:1px solid rgba(255,255,255,.12); background:rgba(12,12,12,.55); }
+.pipeline-story__label { color:var(--gold); font-size:10px; font-weight:700; letter-spacing:.13em; margin-bottom:8px; }
+.pipeline-story__svg { display:block; width:100%; height:auto; overflow:visible; }
+.pipeline-story svg rect { fill:#101010; stroke:#aaa; stroke-width:1.5; }.pipeline-story svg path { fill:none; stroke:#aaa; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }.pipeline-story svg text { fill:#aaa; font:700 10px var(--font-mono); letter-spacing:1px; }
+.pipeline-story .story-person circle { fill:#101010; stroke:var(--gold); }.pipeline-story .story-person path { stroke:var(--gold); }.story-manual-line { stroke:var(--gold)!important; stroke-dasharray:5 5; animation:manualTrace 1.8s linear infinite; }.story-manual-copy { fill:var(--gold)!important; font-size:9px!important; }.story-auto-line { stroke:var(--online)!important; stroke-dasharray:4 6; animation:packetFlow 1.2s linear infinite; }.story-api rect { stroke:var(--online)!important; }.story-api path { stroke:var(--online)!important; }.story-packets rect { fill:var(--online); stroke:none; animation:packetPulse 1.2s infinite alternate; }.pipeline-story__chapter p { margin:8px 0 0; color:#aaa; font-size:11px; line-height:1.5; }.pipeline-story__break { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:10px; color:#aaa; font-size:10px; letter-spacing:.1em; }.pipeline-story__break-line { display:flex; align-items:center; gap:14px; color:#aaa; font-size:10px; font-weight:700; letter-spacing:.1em; }.pipeline-story__break-line:before,.pipeline-story__break-line:after { content:''; flex:1; border-top:1px dashed #666; }.pipeline-story__break-line i { color:var(--gold); font-style:normal; font-size:22px; }.story-secret-packet { position:absolute; right:29%; top:49px; width:18px; height:18px; border:0; background:transparent; cursor:pointer; }.story-secret-packet:before { content:''; display:block; width:10px; height:10px; border:1px solid rgba(214,168,79,.6); animation:packetPulse 3.7s infinite; }.pipeline-story__payload { border:1px solid var(--online); color:var(--online); padding:10px; font-size:10px; line-height:1.5; }
+@keyframes manualTrace { to { stroke-dashoffset:-20; } } @keyframes packetFlow { to { stroke-dashoffset:-20; } } @keyframes packetPulse { to { opacity:.3; transform:scale(.7); } }
+
+.stack__checklist button.stack__checklist-ok { appearance:none; width:max-content; padding:0; border:0; background:transparent; color:#666!important; font:inherit; font-size:14px; letter-spacing:.08em; cursor:pointer; transition:color .2s ease,text-shadow .2s ease; }.stack__checklist button.stack__checklist-ok:hover,.stack__checklist button.stack__checklist-ok:focus-visible { color:#aaa!important; outline:0; text-shadow:0 0 8px rgba(214,168,79,.35); }.stack__checklist button.stack__checklist-ok.is-confirmed { color:var(--online)!important; font-weight:700; text-shadow:0 0 10px rgba(124,255,114,.35); }.stack__secret-response { color:var(--online); border-left:1px solid var(--online); padding:8px 10px; font:10px/1.6 var(--font-mono); letter-spacing:.07em; }.stack__secret-response strong { color:var(--gold); }
+.secret-progress { border:1px solid rgba(214,168,79,.45); cursor:default; }.secret-progress.is-complete { cursor:pointer; }.reward-window { position:fixed; z-index:180; right:28px; bottom:28px; width:min(360px,calc(100vw - 48px)); background:#0a0a0a; border:1px solid var(--gold); box-shadow:0 22px 60px rgba(0,0,0,.75); font-family:var(--font-mono); animation:rewardIn .28s ease-out; }.reward-window header { display:flex; justify-content:space-between; padding:11px 13px; border-bottom:1px solid rgba(255,255,255,.1); color:var(--gold); font-size:10px; letter-spacing:.12em; }.reward-window header button { border:0; background:transparent; color:#aaa; font:18px var(--font-mono); cursor:pointer; }.reward-window__body { padding:18px; }.reward-window h2 { margin:0 0 15px; font:700 16px/1.25 var(--font-sans); }.reward-window p { color:#bbb; font-size:11px; line-height:1.55; }.reward-window__status { margin:16px 0; padding:10px; border-left:1px solid var(--online); color:var(--online); font-size:10px; line-height:1.6; }.reward-window__actions { display:grid; gap:8px; }.reward-window__actions button { padding:10px; border:1px solid var(--gold); background:rgba(214,168,79,.08); color:var(--gold); font:700 10px var(--font-mono); cursor:pointer; }.reward-window__actions button:disabled { border-color:#333; color:#666; cursor:not-allowed; }.reward-window small { display:block; margin-top:12px; color:#666; font-size:8px; }.vk-chat__body small + small { margin-top:8px; } @keyframes rewardIn { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
 
 /* ========================================
    06. ABOUT / STACK (VKTECH)
@@ -1732,4 +1763,40 @@ main {
   background: #000;
   pointer-events: none;
   opacity: 0.95;
+}
+
+/* Migration additions: overlays are deliberately isolated from the original layout. */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+.matrix-debug { position: fixed; z-index: 10000; inset: auto 7vw 8vh; color: #7cff72; font: 700 12px/1.55 var(--font-mono); letter-spacing: .12em; pointer-events: none; display: grid; gap: 4px; text-shadow: 0 0 12px rgba(124,255,114,.55); }
+.secret-progress { position: fixed; z-index: 120; right: 32px; bottom: 28px; color: var(--gold); border: 1px solid rgba(214,168,79,.45); background: rgba(5,5,5,.86); padding: 7px 10px; font: 700 9px var(--font-mono); letter-spacing: .1em; }
+.secret-progress strong { color: var(--online); }
+.reboot-trigger, .pipeline__packet, .status-secret { appearance: none; border: 0; background: transparent; color: inherit; font: inherit; letter-spacing: inherit; cursor: pointer; padding: 0; text-align: inherit; }
+.reboot-trigger:hover, .reboot-trigger:focus-visible, .pipeline__packet:hover, .pipeline__packet:focus-visible, .status-secret:hover, .status-secret:focus-visible { color: var(--gold); outline: 1px solid var(--gold); outline-offset: 4px; }
+.pipeline__packet { color: var(--gold); font-weight: 700; font-size: 11px; }
+.modal-note { margin: 0; color: #aaa; font-size: 12px; line-height: 1.5; }
+.dialog-actions { display: flex; justify-content: flex-end; align-items: center; gap: 14px; }
+.dialog-button { padding: 12px; }
+.vk-chat { position: fixed; z-index: 150; right: 28px; bottom: 28px; font-family: var(--font-mono); }
+.vk-chat__launcher { border: 1px solid rgba(214,168,79,.45); background: rgba(5,5,5,.9); color: #eee; padding: 11px 13px; cursor: pointer; font: 700 10px var(--font-mono); letter-spacing: .1em; }
+.vk-chat__launcher span { color: var(--online); }
+.vk-chat__window { width: min(360px, calc(100vw - 40px)); background: rgba(10,10,10,.97); border: 1px solid var(--gold); box-shadow: 0 18px 50px rgba(0,0,0,.7); }
+.vk-chat__header { display: flex; justify-content: space-between; padding: 10px 12px; color: var(--gold); border-bottom: 1px solid rgba(255,255,255,.1); font-size: 10px; letter-spacing: .1em; }
+.vk-chat__header button { color: #aaa; border: 0; background: transparent; cursor: pointer; font: 16px var(--font-mono); }
+.vk-chat__body { min-height: 100px; padding: 12px; color: #bbb; font-size: 11px; line-height: 1.5; }
+.vk-chat__body p { margin: 0 0 8px; }.vk-chat__body small { color: var(--gold); display: block; overflow-wrap: anywhere; }
+.vk-chat form { padding: 0 12px 12px; display: grid; gap: 8px; }.vk-chat textarea { min-height: 62px; resize: vertical; padding: 8px; background: #111; border: 1px solid #333; color: #fff; font: 11px var(--font-mono); }.vk-chat form button { padding: 9px; border: 1px solid var(--gold); background: rgba(214,168,79,.1); color: var(--gold); font: 700 10px var(--font-mono); cursor: pointer; }
+
+/* Current HUD pass: one quiet global rail, communication grouped on the left. */
+.scroll-interface { right:12px; width:32px; gap:0; }.scroll-interface__top,.scroll-interface__bottom { display:none; }.scroll-interface__rail { width:32px; height:180px; background:transparent; border:0; padding:0; cursor:grab; touch-action:none; position:relative; }.scroll-interface__rail:before { content:''; position:absolute; top:0; bottom:0; left:15px; width:1px; background:rgba(255,255,255,.18); transition:width .18s ease,background .18s ease; }.scroll-interface__fill { position:absolute; left:15px; width:1px; background:var(--gold); transition:width .18s ease; }.scroll-interface__cursor { width:5px; height:5px; margin-left:0; left:13px; border:0; background:var(--gold); box-shadow:0 0 8px rgba(214,168,79,.55); transition:width .18s ease,height .18s ease,left .18s ease,box-shadow .18s ease; }.scroll-interface__cursor span { display:none; }.scroll-interface__rail:hover:before,.scroll-interface__rail.is-dragging:before { width:2px; left:15px; background:rgba(214,168,79,.65); }.scroll-interface__rail:hover .scroll-interface__fill,.scroll-interface__rail.is-dragging .scroll-interface__fill { width:2px; }.scroll-interface__rail:hover .scroll-interface__cursor,.scroll-interface__rail.is-dragging .scroll-interface__cursor { width:9px; height:9px; left:11px; box-shadow:0 0 14px rgba(214,168,79,.8); }.scroll-interface__rail.is-dragging { cursor:grabbing; }
+.vk-chat { left:28px; right:auto; bottom:28px; }.secret-progress { left:28px; right:auto; bottom:74px; }.stack__checklist { border:1px solid rgba(255,255,255,.12); padding:28px; font-family:var(--font-mono); display:flex; flex-direction:column; gap:13px; }.stack__checklist p { margin:0; color:#aaa; font-size:14px; letter-spacing:.08em; }.stack__checklist-ok { color:var(--online)!important; font-weight:700; }.stack__checklist small { margin-top:12px; color:#777; line-height:1.6; font-size:10px; letter-spacing:.08em; }.contact-section + footer { min-height:0!important; padding:18px var(--page-padding)!important; }
+
+@media (max-width: 900px) {
+  .secret-progress { right: 14px; bottom: 14px; font-size: 8px; }
+  .secret-progress { left:12px; right:auto; bottom:64px; }.vk-chat { left: 12px; right:auto; bottom: 12px; }.vk-chat.is-open { inset: 8px; right: 8px; bottom: 8px; }.vk-chat.is-open .vk-chat__window { width: 100%; height: 100%; display: flex; flex-direction: column; }.vk-chat.is-open .vk-chat__body { flex: 1; overflow: auto; }.vk-chat textarea { resize: none; }
+  .cases { overflow: hidden; }.cases__container { width: 100%; }.cases__visual { touch-action: pan-y; }
+  .cases__progress-bar { width: calc(100vw - 40px); overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; padding: 2px 0 10px; margin-top: 12px; }
+  .cases__progress-seg { flex: 0 0 78%; height: auto; min-height: 44px; scroll-snap-align: center; text-align: left; padding: 10px; color: #999; border: 1px solid rgba(255,255,255,.12); background: #0c0c0c; }
+  .cases__progress-seg.is-active { color: #fff; background: rgba(214,168,79,.12); }
+  .cases__mobile-case { display: block; font: 700 9px/1.35 var(--font-mono); letter-spacing: .08em; white-space: normal; }
+  .cases__progress-seg strong { top:7px; right:10px; left:auto; font-size:20px; opacity:.65; transform:none; }.cases__bus-label { margin-top:12px; }
 }

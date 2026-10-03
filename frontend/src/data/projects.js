@@ -1,129 +1,32 @@
 export const PROJECTS = [
   {
-    id: '01',
-    title: 'ALENA DERR // ART PLATFORM',
-    url: 'https://alenaderr.art/',
-    category: 'FULL-STACK / CRM / BOT',
-    year: '2026',
-    status: 'DEPLOYED',
-    desc: 'Полноценный эком-монолит с headless-архитектурой. Клиент выбирает картину → сайт мгновенно шлет данные через webhook в Telegram-бот → бот оформляет заказ и выкидывает карточку в кастомную CRM-панель.',
+    id: '01', title: 'RESTAURANT CHAIN // LEAD AUTOMATION', category: 'AUTOMATION / INTEGRATION', year: '2026', status: 'DEPLOYED',
+    desc: 'Система принимает обращения из нескольких точек, передаёт их в работу и сохраняет единый контекст без ручного копирования.',
     schema: [
-      { 
-        step: '01', 
-        label: 'ФРОНТЕНД (САЙТ)', 
-        desc: 'Клиент выбирает картину и нажимает «Купить»', 
-        illustrationType: 'client-shop',
-        packet: '📦 PAYLOAD: { painting: "Sunset #9", price: "$450" }',
-        statusText: 'Пользователь на сайте: транзакция инициирована'
-      },
-      { 
-        step: '02', 
-        label: 'WEBHOOK / API', 
-        desc: 'Мгновенная передача зашифрованного пакета на сервер', 
-        illustrationType: 'webhook-flow',
-        packet: '⚡ SIGNAL: POST /api/v1/order HTTP/1.1 (14ms)',
-        statusText: 'Шлюз принял пакет, проверка подписи успешна'
-      },
-      { 
-        step: '03', 
-        label: 'TELEGRAM БОТ', 
-        desc: 'Уведомление мгновенно летит художнице в мессенджер', 
-        illustrationType: 'telegram-bot',
-        packet: '🤖 TELEGRAM API: Message sent to chat_id [-1002849...]',
-        statusText: 'Бот разбудил художницу красивой карточкой заказа'
-      },
-      { 
-        step: '04', 
-        label: 'CRM ПАНЕЛЬ', 
-        desc: 'Заказ падает в базу, обновляя аналитику продаж', 
-        illustrationType: 'crm-dashboard',
-        packet: '💾 SQLITE: INSERT INTO orders VALUES (842, "PAID");',
-        statusText: 'Данные в базе, аналитика обновлена в реальном времени'
-      },
+      { step: '01', label: 'ОБРАЩЕНИЕ', desc: 'Гость оставляет запрос в удобном канале.', illustrationType: 'client-shop', packet: 'PAYLOAD: { source: "restaurant", type: "lead" }', statusText: 'Запрос принят в едином контуре' },
+      { step: '02', label: 'ПРОВЕРКА', desc: 'Система проверяет и собирает нужные данные.', illustrationType: 'webhook-flow', packet: 'SIGNAL: normalized and validated', statusText: 'Данные подготовлены к передаче' },
+      { step: '03', label: 'МАРШРУТИЗАЦИЯ', desc: 'Запрос направляется ответственной команде.', illustrationType: 'telegram-bot', packet: 'ROUTE: assigned to responsible team', statusText: 'Команда получила контекст обращения' },
+      { step: '04', label: 'УЧЁТ', desc: 'Статус и история остаются в системе.', illustrationType: 'crm-dashboard', packet: 'STORE: lead context saved', statusText: 'История доступна для дальнейшей работы' },
     ],
   },
   {
-    id: '02',
-    title: 'RESTO-CHAIN iiko SYNC HUB',
-    category: 'ENTERPRISE / POS / AUTOMATION',
-    year: '2026',
-    status: 'ACTIVE',
-    desc: 'Автоматизация ресторанной сети. Касса бьет чек в iiko → локальный демон ловит событие → система сама синхронизирует остатки, а при сбое кассы шлет тревожный алерт.',
+    id: '02', title: 'ALENA DERR // ART PLATFORM', url: 'https://alenaderr.art/', category: 'FULL-STACK / PLATFORM', year: '2026', status: 'DEPLOYED',
+    desc: 'Платформа художницы: выбор работы, понятная заявка и связанный путь от сайта до рабочего контекста.',
     schema: [
-      { 
-        step: '01', 
-        label: 'iiko POS ТЕРМИНАЛ', 
-        desc: 'Кассир пробивает фискальный чек на точке', 
-        illustrationType: 'pos-terminal',
-        packet: '🖥️ POS_EVENT: CHEQUE_CLOSED { table: 4, sum: "340,000 UZS" }',
-        statusText: 'Чек закрыт на кассовом терминале'
-      },
-      { 
-        step: '02', 
-        label: 'LOCAL DAEMON', 
-        desc: 'Фоновый перехват и валидация данных в системе', 
-        illustrationType: 'daemon-sync',
-        packet: '⚙️ DAEMON: Event intercepted. Parsing XML payload...',
-        statusText: 'Локальный демон перехватил событие без задержки'
-      },
-      { 
-        step: '03', 
-        label: 'CLOUD SYNC', 
-        desc: 'Обновление складов и остатков в реальном времени', 
-        illustrationType: 'cloud-stocks',
-        packet: '🔄 SYNC: Stock decremented for item "Ribeye Steak" (-1)',
-        statusText: 'Остатки на складе автоматически пересчитаны'
-      },
-      { 
-        step: '04', 
-        label: 'ALERT BOT', 
-        desc: 'Контроль сбоев и отправка отчетов менеджменту', 
-        illustrationType: 'alert-bot',
-        packet: '🚨 TELEGRAM: Shift report generated successfully.',
-        statusText: 'Отчет улетел управляющему в закрытый чат'
-      },
+      { step: '01', label: 'ВИТРИНА', desc: 'Посетитель изучает работы и выбирает интересующую.', illustrationType: 'client-shop', packet: 'PAYLOAD: artwork selected', statusText: 'Выбор зафиксирован на сайте' },
+      { step: '02', label: 'API', desc: 'Запрос собирается в единый пакет.', illustrationType: 'webhook-flow', packet: 'SIGNAL: request prepared', statusText: 'Пакет готов к передаче' },
+      { step: '03', label: 'СВЯЗЬ', desc: 'Контекст поступает в рабочий канал.', illustrationType: 'telegram-bot', packet: 'CHANNEL: context delivered', statusText: 'Команда видит детали запроса' },
+      { step: '04', label: 'ПОРЯДОК', desc: 'История остаётся доступной для работы.', illustrationType: 'crm-dashboard', packet: 'STORE: request context saved', statusText: 'Контекст сохранён в системе' },
     ],
   },
   {
-    id: '03',
-    title: 'VKTECH // INFRASTRUCTURE NODE',
-    category: 'DEVOPS / SECURITY / CLOUD',
-    year: '2026',
-    status: 'DEPLOYED',
-    desc: 'Защищенный контур на VPS. Docker-контейнеры мониторят здоровье сервисов, делают бэкапы баз данных и пролонгируют SSL-сертификаты.',
+    id: '03', title: 'DOCUMENT PROCESSING // ESTIMATION SYSTEM', category: 'BACKEND / DATA', year: '2026', status: 'ACTIVE',
+    desc: 'Внутренняя система обработки документов: от входящего файла к структурированным данным и прозрачному расчёту.',
     schema: [
-      { 
-        step: '01', 
-        label: 'VPS СЕРВЕР', 
-        desc: 'Изолированное окружение под управлением Linux', 
-        illustrationType: 'vps-server',
-        packet: '🐳 DOCKER: Container health-check active (uptime: 99.98%)',
-        statusText: 'Все контейнеры работают в штатном режиме'
-      },
-      { 
-        step: '02', 
-        label: 'WATCHDOG', 
-        desc: 'Автоматический перезапуск служб при сбоях', 
-        illustrationType: 'watchdog-guard',
-        packet: '🛡️ MONITOR: Memory usage normal (1.2GB / 8GB)',
-        statusText: 'Сторожевой таймер проверяет целостность служб'
-      },
-      { 
-        step: '03', 
-        label: 'SQLITE BACKUP', 
-        desc: 'Ежедневные зашифрованные дампы баз данных', 
-        illustrationType: 'sqlite-backup',
-        packet: '💾 TAR.GZ: Backup created -> /var/backups/db_safe.enc',
-        statusText: 'Резервная копия упакована и отправлена в облако'
-      },
-      { 
-        step: '04', 
-        label: 'NGINX GATEWAY', 
-        desc: 'Шифрование трафика и управление SSL-доступами', 
-        illustrationType: 'nginx-ssl',
-        packet: '🔒 CERTBOT: SSL auto-renewal checked (Valid for 89 days)',
-        statusText: 'Защищенный контур активен, сертификаты в порядке'
-      },
+      { step: '01', label: 'ДОКУМЕНТ', desc: 'Входящие материалы попадают в рабочий контур.', illustrationType: 'pos-terminal', packet: 'INPUT: document received', statusText: 'Документ принят системой' },
+      { step: '02', label: 'РАЗБОР', desc: 'Система выделяет нужные данные.', illustrationType: 'daemon-sync', packet: 'PARSE: fields normalized', statusText: 'Структура документа собрана' },
+      { step: '03', label: 'РАСЧЁТ', desc: 'Данные участвуют в понятной оценке.', illustrationType: 'cloud-stocks', packet: 'CALC: estimate prepared', statusText: 'Расчёт готов к проверке' },
+      { step: '04', label: 'РЕЗУЛЬТАТ', desc: 'Команда получает готовый рабочий результат.', illustrationType: 'alert-bot', packet: 'OUTPUT: result available', statusText: 'Результат доступен ответственному' },
     ],
   },
 ]
