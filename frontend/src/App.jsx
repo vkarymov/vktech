@@ -89,6 +89,35 @@ function App() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [])
 
+  useEffect(() => {
+    const media = gsap.matchMedia()
+
+    media.add('(max-width: 900px) and (prefers-reduced-motion: no-preference)', () => {
+      const panels = [manifestoRef.current, casesRef.current].filter(Boolean)
+      const context = gsap.context(() => {
+        panels.forEach((panel) => {
+          const timeline = gsap.timeline({
+            scrollTrigger: {
+              trigger: panel,
+              start: 'top 92%',
+              end: 'top 38%',
+              scrub: true,
+              invalidateOnRefresh: true,
+            },
+          })
+
+          timeline
+            .to(panel, { y: -18, scale: 0.992, duration: 0.45, ease: 'none' })
+            .to(panel, { y: 0, scale: 1, duration: 0.55, ease: 'none' })
+        })
+      })
+
+      return () => context.revert()
+    })
+
+    return () => media.revert()
+  }, [])
+
   // Пасхалка: клик по логотипу 3 раза запускает матрицу
   const handleLogoClick = (e) => {
     e.preventDefault()

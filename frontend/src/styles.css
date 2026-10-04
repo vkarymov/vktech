@@ -1800,3 +1800,99 @@ main {
   .cases__mobile-case { display: block; font: 700 9px/1.35 var(--font-mono); letter-spacing: .08em; white-space: normal; }
   .cases__progress-seg strong { top:7px; right:10px; left:auto; font-size:20px; opacity:.65; transform:none; }.cases__bus-label { margin-top:12px; }
 }
+/* Mobile-first terminal pass */
+@media (max-width: 900px) {
+  body { overscroll-behavior-y: contain; }
+  .navigation { height:58px; background:linear-gradient(#050505 55%,transparent); }
+  .navigation__logo-sub,.navigation__contact span { display:none; }
+  .hero { min-height:100svh!important; min-height:100dvh!important; padding:76px 20px 34px!important; display:flex; align-items:center; }
+  .hero__content { width:100%; }
+  .hero__title { font-size:clamp(42px,12.8vw,62px)!important; line-height:.94!important; letter-spacing:-.055em!important; max-width:100%; }
+  .hero__meta,.hero__coordinates { font-size:9px!important; opacity:.55; }
+  .manifesto,.cases,.capabilities,.pipeline,.stack,.contact-section { min-height:100svh!important; padding:76px 20px 56px!important; }
+  .manifesto__title { font-size:clamp(40px,12vw,58px)!important; line-height:.96!important; }
+  .manifesto__text { font-size:15px!important; line-height:1.5!important; }
+  .manifesto__items { margin-top:28px!important; gap:12px!important; }
+  .manifesto__item { min-height:120px; padding:18px!important; }
+  .cases__visual { height:min(54vw,290px)!important; min-height:210px; }
+  .cases__description { font-size:14px!important; line-height:1.5!important; }
+  .cases__progress-bar { margin-bottom:18px; }
+  .capabilities__grid,.stack__grid { gap:12px!important; }
+  .capabilities__item,.stack__category { min-height:108px; padding:16px!important; }
+  .pipeline-story { gap:12px!important; }
+  .pipeline-story__chapter { padding:12px!important; }
+  .stack__checklist { padding:18px!important; }
+  .contact-section { min-height:78svh!important; justify-content:center; }
+  .contact__heading { font-size:clamp(34px,10vw,52px)!important; }
+  .contact__footer-info { margin-top:34px; gap:10px; flex-wrap:wrap; font-size:8px; }
+  .vk-chat.is-open { position:fixed; inset:0!important; z-index:2100; padding:env(safe-area-inset-top) 10px env(safe-area-inset-bottom); background:#050505; }
+  .vk-chat.is-open .vk-chat__window { height:100%; max-height:100dvh; }
+  .vk-chat__launcher { min-height:44px; }
+  .secret-progress { pointer-events:none; }
+}
+@media (max-width: 480px) { .hero__title{font-size:clamp(40px,12.2vw,52px)!important}.pipeline-story__svg{min-height:108px}.matrix-debug{inset:auto 18px 10vh;font-size:10px}.reward-window{right:12px;bottom:12px;width:calc(100vw - 24px)} }
+/* 01→02: dedicated handset composition */
+@media (max-width: 900px) {
+  .hero { position:relative!important; display:block!important; min-height:100dvh!important; padding:0 20px!important; overflow:hidden; }
+  .hero__grid { opacity:.28; }
+  .hero__top,.hero__eyebrow { display:none!important; }
+  .hero__content { position:absolute!important; top:18vh!important; left:20px!important; right:20px!important; width:auto!important; transform:none!important; opacity:1!important; }
+  .hero__title { visibility:visible!important; }
+  .hero__title { display:grid!important; gap:2px!important; margin:0!important; font-size:clamp(39px,11.3vw,52px)!important; line-height:.92!important; }
+  .hero__title-line--status { color:var(--gold); text-shadow:0 0 20px rgba(214,168,79,.3); }
+  .hero__bottom { position:absolute!important; left:20px!important; right:20px!important; bottom:8.5vh!important; display:flex!important; flex-direction:column!important; gap:14px!important; transform:none!important; opacity:1!important; }
+  .hero__bottom > * { transform:none!important; opacity:1!important; }
+  .hero__scroll { font-size:10px!important; color:#b7b7b7!important; letter-spacing:.14em!important; }
+  .manifesto { position:relative!important; min-height:auto!important; padding-top:92px!important; }
+  .manifesto:before { content:'SYSTEM POWER // MANIFESTO'; position:absolute; top:0; left:20px; right:20px; height:52px; border-top:1px solid var(--gold); border-bottom:1px solid rgba(214,168,79,.4); color:var(--gold); font:700 9px/52px var(--font-mono); letter-spacing:.16em; background:linear-gradient(90deg,rgba(214,168,79,.12),transparent); animation:mobileBoot .7s ease-out both; }
+  .manifesto__top { position:static!important; margin:0 0 18px!important; }
+  .manifesto__top .reboot-trigger { position:static!important; display:inline-flex!important; padding:10px 12px!important; border:1px solid rgba(214,168,79,.55)!important; color:var(--gold)!important; font-size:9px!important; }
+  .manifesto__title { font-size:clamp(38px,10.8vw,48px)!important; line-height:.94!important; letter-spacing:-.045em!important; margin:0!important; }
+  .manifesto__title > * { transform:none!important; opacity:1!important; }
+  .secret-progress { top:auto!important; bottom:66px!important; left:12px!important; font-size:7px!important; opacity:.72; }
+  .vk-chat.is-minimized { bottom:12px!important; left:12px!important; z-index:150!important; }
+  .vk-chat__launcher { padding:9px 11px!important; font-size:8px!important; }
+}
+@keyframes mobileBoot { from { opacity:0; transform:translateY(-12px); } to { opacity:1; transform:none; } }
+/* Mobile 01→02 motion layer: BOOT → STABLE → HANDOFF */
+@media (max-width:900px) and (prefers-reduced-motion:no-preference){
+ .navigation__logo,.navigation__contact{animation:systemReveal .38s .05s both}
+ .hero__title-line{animation:heroLineBoot .34s both!important;clip-path:inset(0 0 0 0)}
+ .hero__title-line:nth-child(1){animation-delay:.12s!important}.hero__title-line:nth-child(2){animation-delay:.27s!important}.hero__title-line:nth-child(3){animation-delay:.42s!important}
+ .hero__title-line--status{animation:brokenLamp 1.45s .58s both!important;position:relative}
+ .hero__title-line--status:after{content:'';position:absolute;left:0;right:0;bottom:-8px;height:1px;background:var(--gold);opacity:0;animation:lampAfterimage 1.45s .58s both}
+ .hero:after{content:'';position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;animation:rareScan 7s 2.2s infinite;pointer-events:none}
+ .hero__grid{animation:gridBreath 5s ease-in-out infinite}
+ .hero__arrow{display:inline-block;animation:cueSignal 1.8s ease-in-out infinite}
+ .manifesto:before{animation:moduleOnline .55s ease-out both;animation-timeline:view();animation-range:entry 0% entry 45%}
+ .manifesto__title span:last-child{animation:noiseWord 4.8s 1.2s infinite}
+}
+
+@media (max-width: 900px) {
+  .manifesto__laser-line {
+    box-shadow: 0 0 10px rgba(214, 168, 79, 0.8), 0 0 25px rgba(214, 168, 79, 0.8);
+  }
+
+  .laser__hud {
+    box-shadow: 0 0 14px rgba(214, 168, 79, 0.18);
+  }
+
+  .hero + .manifesto,
+  .manifesto + .cases {
+    width: auto;
+    margin: 28px 12px 0;
+    border: 1px solid rgba(214, 168, 79, 0.62);
+    border-left: 3px solid var(--gold);
+    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.56);
+    transform-origin: 50% 100%;
+    will-change: transform;
+  }
+}
+@keyframes systemReveal{from{opacity:0;clip-path:inset(0 100% 0 0);transform:translateX(-8px)}to{opacity:1;clip-path:inset(0);transform:none}}
+@keyframes heroLineBoot{from{opacity:0;transform:translateY(18px);clip-path:inset(100% 0 0 0)}to{opacity:1;transform:none;clip-path:inset(0)}}
+@keyframes brokenLamp{0%,10%{opacity:0;color:#42371d;text-shadow:none}14%{opacity:.5;color:#8d6c30}18%,26%{opacity:.08}31%{opacity:.7;color:#c4933d;text-shadow:0 0 8px rgba(214,168,79,.25)}38%{opacity:.15;transform:translateX(-3px)}43%{opacity:1;transform:translateX(2px);color:#f0c56d;text-shadow:0 0 20px rgba(214,168,79,.55)}51%{opacity:.5;transform:none}58%,100%{opacity:1;color:var(--gold);text-shadow:0 0 8px rgba(214,168,79,.2)}}
+@keyframes lampAfterimage{0%,34%{opacity:0}43%{opacity:1;box-shadow:0 0 18px var(--gold)}62%,100%{opacity:.18}}
+@keyframes rareScan{0%,78%{opacity:0;transform:translateY(0)}83%{opacity:.8}88%{opacity:0;transform:translateY(74vh)}100%{opacity:0}}
+@keyframes gridBreath{0%,100%{opacity:.22}50%{opacity:.36}}@keyframes cueSignal{0%,100%{opacity:.45;transform:translateY(0)}50%{opacity:1;transform:translateY(6px)}}
+@keyframes moduleOnline{from{opacity:0;letter-spacing:.35em;filter:brightness(2)}to{opacity:1;letter-spacing:.16em;filter:none}}@keyframes noiseWord{0%,91%,100%{clip-path:inset(0);transform:none}93%{clip-path:inset(25% 0 35% 0);transform:translateX(2px)}95%{clip-path:inset(60% 0 0 0);transform:translateX(-2px)}}
+  .hero,.manifesto{will-change:transform,filter;transform-style:preserve-3d}
